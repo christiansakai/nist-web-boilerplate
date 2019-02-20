@@ -1,3 +1,18 @@
+# Answer to Take Home Coding Test
+
+## Run 
+
+```
+npm install
+node server.js
+```
+
+Server will be available at http://localhost:3000/ 
+
+## Notes
+
+I did not include any test here because to do so it means I need to do a separate build step. This is simple enough and gets the functional requirement done.
+
 # Background
 
 [NIST](https://www.nist.gov/) recently updates their [Digital Identity Guidelines](https://pages.nist.gov/800-63-3/) in June 2017.

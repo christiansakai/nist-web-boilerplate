@@ -8,19 +8,87 @@
         async function fetchPws() {
           const response = await fetch("http://localhost:3000/passwords");
           const passwords = await response.text();
-          // TODO: parse and store passwords.
+
+          const submit = document.getElementById("submit");
+
+          // Use map to have O(1) lookup.
+          window.commonPasswords = passwords
+            .split("\n")
+            .reduce((map, password) => {
+              map[password] = true;
+              return map;
+            }, {});
         };
+
         fetchPws();
       })();
     </script>
   </head>
   <body>
     <h1>NIST Password Validator</h1>
-    <div>
+    <div id="auth">
       Password:
-      <input type="password" autocomplete="off" required>
-      <input type="submit" value="Check">
+      <input id="password" type="password" autocomplete="off" required>
+      <input id="submit" type="submit" value="Check">
     </div>
+    <script>
+        const auth = document.getElementById("auth");
+        const password = document.getElementById("password");
+        const submit = document.getElementById("submit");
+        const messageId = "message";
+
+        const validators = [
+          {
+            validate: (password) => password.length >= 8 && password.length <= 64,
+            errMessage: "Password must be between 8 to 64 characters"
+          },
+          {
+            validate: (password) => {
+              for (let i = 0; i < password.length; i++)
+                if (password.charCodeAt(i) > 127) {
+                  return false;
+                }
+
+              return true;
+            },
+            errMessage: "Password must be ASCII only"
+          },
+          {
+            validate: (password) => window.commonPasswords[password] !== true,
+            errMessage: "Password is too common"
+          },
+        ];
+
+        function createSpanText(text) {
+          const textNode = document.createTextNode(text);
+
+          const spanNode = document.createElement("span");
+          spanNode.setAttribute("id", messageId);
+          spanNode.appendChild(textNode);
+
+          return spanNode;
+        }
+
+        submit.onclick = function(event) {
+          event.preventDefault();
+
+          const prevMessage = document.getElementById(messageId);
+          if (prevMessage) {
+            auth.removeChild(prevMessage);
+          }
+
+          for (let i = 0; i < validators.length; i++) {
+            const v = validators[i];
+            if (!v.validate(password.value)) {
+              const messageNode = createSpanText(v.errMessage);
+              return auth.appendChild(messageNode);
+            }
+          }
+
+          const messageNode = createSpanText("Password submitted");
+          return auth.appendChild(messageNode);
+        };
+    </script>
   </body>
 </html>
 
